@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+            transition: background-color 0.5s ease;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: #666;
+            font-weight: normal;
+            margin-bottom: 40px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #stop {
+            background-color: #f44336;
+        }
+
+        #stop:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Asynchronous javascript</h1>
+    <h2>color changing of background randomly using Async js</h2>
+   <div class="buttons">
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+   </div>
+   <script>
+        const colorChange=function(){
+            let hex='0123456789ABCDEF';
+            color='#';
+            for(let i=0;i<6;i++){
+                color+=hex[Math.floor(Math.random()*16)];
+            }
+            return color;
+        }
+        //hence a random color is generated;
+        const start=document.querySelector('#start');
+        const stop=document.querySelector('#stop');
+        const changeBg=function(){
+            document.querySelector('body').style.backgroundColor=colorChange();
+        }
+        let curStatus;
+        start.addEventListener('click',()=>{
+            if(!curStatus){
+                curStatus=setInterval(changeBg,1000);
+            }
+        })
+        stop.addEventListener('click',()=>{
+            clearInterval(curStatus);
+            curStatus=null;
+        })
+   </script>
+</body>
+</html>
