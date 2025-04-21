@@ -115,6 +115,16 @@
 
   let drawing = false;
 
+  // Resize canvas to fit container (responsive) and scale coordinates
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas(); // call on load
+
   // Mouse events
   canvas.addEventListener('mousedown', (e) => {
     drawing = true;
@@ -138,12 +148,12 @@
     ctx.moveTo(e.offsetX, e.offsetY);
   });
 
-  // Touch events
+  // Touch event helpers
   function getTouchPos(e) {
     const rect = canvas.getBoundingClientRect();
     return {
-      x: e.touches[0].clientX - rect.left,
-      y: e.touches[0].clientY - rect.top
+      x: (e.touches[0].clientX - rect.left),
+      y: (e.touches[0].clientY - rect.top)
     };
   }
 
@@ -159,6 +169,7 @@
     if (!drawing) return;
     e.preventDefault();
     const pos = getTouchPos(e);
+
     ctx.lineWidth = brushSize.value;
     ctx.lineCap = 'round';
     ctx.strokeStyle = colorPicker.value;
@@ -169,16 +180,19 @@
     ctx.moveTo(pos.x, pos.y);
   }
 
+  function endTouch() {
+    drawing = false;
+  }
+
   canvas.addEventListener('touchstart', startTouch, { passive: false });
   canvas.addEventListener('touchmove', moveTouch, { passive: false });
-  canvas.addEventListener('touchend', () => drawing = false);
+  canvas.addEventListener('touchend', endTouch);
 
-  // Clear canvas
+  // Clear & Save
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Save drawing
   function downloadImage() {
     const link = document.createElement('a');
     link.download = 'my_drawing.png';
