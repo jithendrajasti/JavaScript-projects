@@ -7,7 +7,7 @@
   <style>
     * {
       box-sizing: border-box;
-      font-family:cursive;
+      font-family: cursive;
     }
 
     body {
@@ -72,7 +72,7 @@
       background-color: #555;
     }
 
-    input{
+    input {
       cursor: pointer;
     }
 
@@ -101,105 +101,110 @@
   <div class="toolbar">
     <label>Color: <input type="color" id="colorPicker" value="#000000"></label>
     <label>Brush Size: <input type="range" id="brushSize" min="1" max="20" value="4"></label>
+    <button id="eraserBtn" onclick="toggleEraser()">🧽 Erase</button>
     <button onclick="clearCanvas()">🧼 Clear</button>
     <button onclick="downloadImage()">💾 Save</button>
   </div>
 
   <canvas id="drawingCanvas" width="800" height="500"></canvas>
 
-<script>
-  const canvas = document.getElementById('drawingCanvas');
-  const ctx = canvas.getContext('2d');
-  const colorPicker = document.getElementById('colorPicker');
-  const brushSize = document.getElementById('brushSize');
+  <script>
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const brushSize = document.getElementById('brushSize');
+    const eraserBtn = document.getElementById('eraserBtn');
 
-  let drawing = false;
+    let drawing = false;
+    let isErasing = false;
 
-  // Resize canvas to fit container (responsive) and scale coordinates
-  function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-  }
+    function toggleEraser() {
+      isErasing = !isErasing;
+      eraserBtn.textContent = isErasing ? '✏️ Brush' : '🧽 Erase';
+      eraserBtn.style.backgroundColor = isErasing ? '#d32f2f' : '#333';
+    }
 
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas(); // call on load
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
 
-  // Mouse events
-  canvas.addEventListener('mousedown', (e) => {
-    drawing = true;
-    ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
-  });
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-  canvas.addEventListener('mouseup', () => drawing = false);
-  canvas.addEventListener('mouseout', () => drawing = false);
+    canvas.addEventListener('mousedown', (e) => {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
 
-  canvas.addEventListener('mousemove', (e) => {
-    if (!drawing) return;
+    canvas.addEventListener('mouseup', () => drawing = false);
+    canvas.addEventListener('mouseout', () => drawing = false);
 
-    ctx.lineWidth = brushSize.value;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = colorPicker.value;
+    canvas.addEventListener('mousemove', (e) => {
+      if (!drawing) return;
 
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
-  });
+      ctx.lineWidth = brushSize.value;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = isErasing ? '#ffffff' : colorPicker.value;
 
-  // Touch event helpers
-  function getTouchPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: (e.touches[0].clientX - rect.left),
-      y: (e.touches[0].clientY - rect.top)
-    };
-  }
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
 
-  function startTouch(e) {
-    e.preventDefault();
-    drawing = true;
-    const pos = getTouchPos(e);
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-  }
+    function getTouchPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (e.touches[0].clientX - rect.left),
+        y: (e.touches[0].clientY - rect.top)
+      };
+    }
 
-  function moveTouch(e) {
-    if (!drawing) return;
-    e.preventDefault();
-    const pos = getTouchPos(e);
+    function startTouch(e) {
+      e.preventDefault();
+      drawing = true;
+      const pos = getTouchPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
 
-    ctx.lineWidth = brushSize.value;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = colorPicker.value;
+    function moveTouch(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const pos = getTouchPos(e);
 
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-  }
+      ctx.lineWidth = brushSize.value;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = isErasing ? '#ffffff' : colorPicker.value;
 
-  function endTouch() {
-    drawing = false;
-  }
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
 
-  canvas.addEventListener('touchstart', startTouch, { passive: false });
-  canvas.addEventListener('touchmove', moveTouch, { passive: false });
-  canvas.addEventListener('touchend', endTouch);
+    function endTouch() {
+      drawing = false;
+    }
 
-  // Clear & Save
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
+    canvas.addEventListener('touchstart', startTouch, { passive: false });
+    canvas.addEventListener('touchmove', moveTouch, { passive: false });
+    canvas.addEventListener('touchend', endTouch);
 
-  function downloadImage() {
-    const link = document.createElement('a');
-    link.download = 'my_drawing.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  }
-</script>
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function downloadImage() {
+      const link = document.createElement('a');
+      link.download = 'my_drawing.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
 
 </body>
 </html>
